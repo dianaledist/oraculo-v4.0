@@ -970,7 +970,7 @@
                     </svg>
                 </div>
                 <p class="subtitle">
-                    Cada carta es una coordenada desconocida hacia un lugar de vos que todavía no exploraste
+                    Cada carta es una coordenada desconocida hacia un lugar de vos que todavía no exploraste. Cada vez que toques la carta, aparecerá una nueva. Hasta el ♾️
                 </p>
             </div>
 
@@ -1114,7 +1114,7 @@
 
     <div class="drawer" id="memoryDrawer">
         <div class="drawer-header">
-            <h2 class="drawer-title">Tu Camino</h2>
+            <h2 class="drawer-title">Memoria de Tu Camino</h2>
             <div class="close-drawer" id="closeMemoryDrawer">
                 <svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -1140,7 +1140,7 @@
                 descripcion: 'Hay una fisura en tu coraza, y por ahí se cuela una luz que no reconocés. No la tapes. Dejala entrar, aunque arda un poco. Es la invitación a ver con ojos nuevos lo que creías imposible.',
                 accion: 'Escribí tres cosas que nunca te animaste a intentar. Elegí la que más miedo te da y hacé un paso microscópico hacia ella hoy.',
                 reflexion: '¿Qué pasaría si lo imposible ya estuviera pasando y no te dieras cuenta?',
-                imagen: null
+                imagen: 
             },
             {
                 id: 2,
@@ -1410,7 +1410,7 @@
         }
 
         function clearHistory() {
-            if (confirm('¿Estás seguro de que querés borrar la memoria de esta sesión?')) {
+            if (confirm('¿Quieres borrar la memoria de esta sesión?')) {
                 history = [];
                 expandedCards.clear();
                 sessionStorage.removeItem('oracleHistory');
