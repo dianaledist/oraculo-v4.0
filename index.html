@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Mapa de lo Imposible - Humantopy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0a1e 0%, #2d1b4e 50%, #0f0a1e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: #a78bfa;
+            opacity: 0.3;
+            pointer-events: none;
+            animation: float linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(10px, -20px); }
+        }
+
+        .top-header {
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+            padding: 1rem 1.5rem;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .logo-container:hover {
+            opacity: 0.8;
+        }
+
+        .logo-placeholder {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #a78bfa, #ec4899);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #d8b4fe;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb-item {
+            color: #d8b4fe;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .breadcrumb-item.clickable {
+            cursor: pointer;
+        }
+
+        .breadcrumb-item.clickable:hover {
+            color: #ec4899;
+        }
+
+        .breadcrumb-separator {
+            color: rgba(168, 85, 247, 0.5);
+            font-weight: 300;
+        }
+
+        .breadcrumb-current {
+            color: #ec4899;
+            font-weight: 500;
+        }
+
+        .breadcrumb-dropdown {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            left: 0;
+            background: rgba(15, 23, 42, 0.98);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            min-width: 320px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        .breadcrumb-dropdown.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: translateY(0);
+        }
+
+        .dropdown-category {
+            margin-bottom: 1rem;
+        }
+
+        .dropdown-category:last-child {
+            margin-bottom: 0;
+        }
+
+        .dropdown-category-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #a78bfa;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem;
+            color: #d8b4fe;
+            text-decoration: none;
+            display: block;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            margin-bottom: 0.25rem;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(168, 85, 247, 0.2);
+            color: #ec4899;
+        }
+
+        .dropdown-item.active {
+            background: rgba(168, 85, 247, 0.3);
+            color: #ec4899;
+        }
+
+        .dropdown-item-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .dropdown-item-subtitle {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1.5rem 2rem 1.5rem;
+            position: relative;
+            z-index: 10;
+            overflow-y: auto;
+            overflow-x: hidden;
+            margin-bottom: 80px;
+        }
+
+        .container {
+            max-width: 48rem;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(168, 85, 247, 0.3);
+            padding: 0.75rem 0;
+            z-index: 100;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .bottom-nav-content {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #d8b4fe;
+            opacity: 0.6;
+            flex: 1;
+            max-width: 120px;
+        }
+
+        .nav-item.active {
+            opacity: 1;
+            color: #ec4899;
+        }
+
+        .nav-item:hover {
+            opacity: 1;
+            transform: translateY(-2px);
+        }
+
+        .nav-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        .nav-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .drawer-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .drawer {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            max-height: 80vh;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(88, 28, 135, 0.98));
+            backdrop-filter: blur(20px);
+            z-index: 201;
+            transition: bottom 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            overflow-y: auto;
+            padding: 2rem;
+            padding-bottom: 7rem;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+            border-top-left-radius: 1.5rem;
+            border-top-right-radius: 1.5rem;
+        }
+
+        .drawer.active {
+            bottom: 0;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .drawer-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #d8b4fe;
+        }
+
+        .close-drawer {
+            cursor: pointer;
+            padding: 0.5rem;
+            color: #d8b4fe;
+            transition: all 0.3s ease;
+        }
+
+        .close-drawer:hover {
+            color: #f9a8d4;
+            transform: rotate(90deg);
+        }
+
+        .close-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        .selected-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .selected-filters:empty {
+            display: none;
+        }
+
+        .filter-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-pill:hover {
+            opacity: 0.8;
+        }
+
+        .filter-pill-remove {
+            font-size: 1.2rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .filter-section {
+            margin-bottom: 2rem;
+        }
+
+        .filter-section-title {
+            color: #d8b4fe;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-option:hover {
+            background: rgba(168, 85, 247, 0.2);
+        }
+
+        .filter-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+            accent-color: #a78bfa;
+        }
+
+        .filter-label {
+            color: #d8b4fe;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .history-empty {
+            text-align: center;
+            color: #d8b4fe;
+            opacity: 0.6;
+            padding: 3rem 1rem;
+        }
+
+        .history-card {
+            background: rgba(88, 28, 135, 0.3);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .history-card:hover {
+            background: rgba(88, 28, 135, 0.4);
+            border-color: rgba(168, 85, 247, 0.5);
+        }
+
+        .history-card.expanded {
+            background: rgba(88, 28, 135, 0.5);
+        }
+
+        .history-card-title {
+            font-weight: bold;
+            color: #d8b4fe;
+            margin-bottom: 0.5rem;
+            font-size: 1.125rem;
+        }
+
+        .history-card-description {
+            color: #e9d5ff;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-card-description.preview {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .history-card-action, .history-card-reflection {
+            color: #d8b4fe;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(168, 85, 247, 0.2);
+            font-style: italic;
+        }
+
+        .history-card-label {
+            font-weight: 600;
+            color: #f9a8d4;
+            font-style: normal;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .clear-history-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(220, 38, 38, 0.3);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #fca5a5;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .clear-history-btn:hover {
+            background: rgba(220, 38, 38, 0.5);
+            border-color: rgba(239, 68, 68, 0.7);
+        }
+
+        .content-header {
+            text-align: center;
+        }
+
+        .title-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .icon {
+            width: 1.75rem;
+            height: 1.75rem;
+            color: #a78bfa;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: bold;
+            background: linear-gradient(90deg, #a78bfa, #ec4899, #a78bfa);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .subtitle {
+            color: #d8b4fe;
+            opacity: 0.8;
+            max-width: 36rem;
+            margin: 0 auto;
+            line-height: 1.6;
+            font-size: clamp(0.9rem, 2vw, 1.125rem);
+        }
+
+        .card-wrapper {
+            width: 100%;
+            max-width: 32rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .card-container {
+            width: 100%;
+            max-width: 32rem;
+            perspective: 1000px;
+            min-height: 550px;
+        }
+
+        .card {
+            width: 100%;
+            min-height: 550px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            width: 100%;
+            backface-visibility: hidden;
+            border-radius: 1.5rem;
+            border: 2px solid rgba(168, 85, 247, 0.4);
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 0 30px rgba(168, 85, 247, 0.4),
+                0 0 60px rgba(168, 85, 247, 0.2),
+                inset 0 0 30px rgba(168, 85, 247, 0.1);
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, rgba(88, 28, 135, 0.5), rgba(157, 23, 77, 0.5));
+            min-height: 550px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            cursor: pointer;
+        }
+
+        .card-front-content {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .sparkle-icon {
+            width: 5rem;
+            height: 5rem;
+            color: #d8b4fe;
+            margin: 0 auto 1.5rem;
+            animation: pulseIcon 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseIcon {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .reveal-text {
+            color: #d8b4fe;
+            font-size: 1.25rem;
+            opacity: 0.7;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(88, 28, 135, 0.95));
+            transform: rotateY(180deg);
+            padding: 2.5rem;
+            min-height: 550px;
+        }
+
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .category-pill {
+            display: inline-block;
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            margin-bottom: 1.25rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .category-mente {
+            background: rgba(147, 197, 253, 0.3);
+            color: #93c5fd;
+            border: 1px solid rgba(147, 197, 253, 0.5);
+        }
+
+        .category-cuerpo {
+            background: rgba(134, 239, 172, 0.3);
+            color: #86efac;
+            border: 1px solid rgba(134, 239, 172, 0.5);
+        }
+
+        .category-espiritu, .category-mas-alla {
+            background: rgba(196, 181, 253, 0.3);
+            color: #c4b5fd;
+            border: 1px solid rgba(196, 181, 253, 0.5);
+        }
+
+        .category-emociones {
+            background: rgba(252, 165, 165, 0.3);
+            color: #fca5a5;
+            border: 1px solid rgba(252, 165, 165, 0.5);
+        }
+
+        .category-relaciones {
+            background: rgba(251, 207, 232, 0.3);
+            color: #fbcfe8;
+            border: 1px solid rgba(251, 207, 232, 0.5);
+        }
+
+        .card-header {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .map-icon {
+            width: 1.75rem;
+            height: 1.75rem;
+            color: #f9a8d4;
+            flex-shrink: 0;
+            margin-top: 0.25rem;
+        }
+
+        .card-title {
+            font-size: clamp(1.75rem, 4vw, 2.25rem);
+            font-weight: bold;
+            background: linear-gradient(to right, #d8b4fe, #f9a8d4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .description {
+            color: #e9d5ff;
+            line-height: 1.6;
+            font-size: 1.125rem;
+        }
+
+        .card-image-container {
+            width: 100%;
+            min-height: 200px;
+            background: rgba(168, 85, 247, 0.1);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed rgba(168, 85, 247, 0.3);
+        }
+
+        .card-image-placeholder {
+            color: rgba(216, 180, 254, 0.4);
+            font-size: 0.875rem;
+            font-style: italic;
+        }
+
+        .collapsible-section {
+            border-top: 1px solid rgba(168, 85, 247, 0.3);
+            padding-top: 1.25rem;
+        }
+
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            transition: all 0.2s ease;
+        }
+
+        .collapsible-header:hover {
+            color: #ec4899;
+        }
+
+        .collapsible-label {
+            color: #f9a8d4;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .collapsible-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            transition: transform 0.3s ease;
+        }
+
+        .collapsible-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        .heart-icon, .star-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, margin-top 0.4s ease;
+        }
+
+        .collapsible-content.expanded {
+            max-height: 1000px;
+            margin-top: 0.75rem;
+        }
+
+        .action-text, .reflection-text {
+            color: #d8b4fe;
+            font-style: italic;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        /* Botón girar dentro de la card */
+        .flip-button {
+            margin-top: 2rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #ec4899, #a78bfa);
+            border: none;
+            border-radius: 9999px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+            width: 100%;
+        }
+
+        .flip-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.6);
+        }
+
+        .flip-button:active {
+            transform: translateY(0);
+        }
+
+        .flip-button-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(216, 180, 254, 0.5);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-top: 2rem;
+            padding: 1rem;
+        }
+
+        .links {
+            color: #ec4899;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .links:hover {
+            color: #f9a8d4;
+        }
+
+        @media (min-width: 1025px) {
+            .drawer {
+                bottom: auto;
+                top: 0;
+                right: -100%;
+                left: auto;
+                width: 450px;
+                max-height: 100vh;
+                height: 100vh;
+                border-radius: 0;
+                padding-bottom: 2rem;
+                transition: right 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            }
+
+            .drawer.active {
+                right: 0;
+                bottom: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .breadcrumb {
+                font-size: 0.8rem;
+            }
+
+            .breadcrumb-dropdown {
+                min-width: 280px;
+            }
+
+            .card-container {
+                max-width: 22rem;
+            }
+            
+            .card-back {
+                padding: 1.75rem;
+            }
+
+            .description {
+                font-size: 1.05rem;
+            }
+
+            .action-text, .reflection-text {
+                font-size: 0.95rem;
+            }
+
+            .main-content {
+                padding: 1.5rem 1rem 2rem 1rem;
+            }
+
+            .logo-text {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.width = Math.random() * 3 + 1 + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDuration = Math.random() * 10 + 10 + 's';
+            particle.style.animationDelay = Math.random() * 5 + 's';
+            document.body.appendChild(particle);
+        }
+    </script>
+
+    <header class="top-header">
+        <div class="header-content">
+            <div class="logo-container" id="logoContainer">
+                <div class="logo-placeholder">H</div>
+                <span class="logo-text">Humantopy</span>
+            </div>
+            
+            <nav class="breadcrumb">
+                <span class="breadcrumb-item clickable" id="breadcrumbCategory">
+                    Herramientas
+                    <div class="breadcrumb-dropdown" id="categoryDropdown">
+                        <div class="dropdown-category">
+                            <div class="dropdown-category-title">Desarrollo Personal</div>
+                            <a href="#" class="dropdown-item active">
+                                <div>
+                                    <div class="dropdown-item-title">Oráculo de lo Imposible</div>
+                                    <div class="dropdown-item-subtitle">Cartas de autoconocimiento</div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="dropdown-category">
+                            <div class="dropdown-category-title">Holísticas</div>
+                            <a href="#" class="dropdown-item" onclick="alert('🔢 Próximamente'); return false;">
+                                <div>
+                                    <div class="dropdown-item-title">Numerología Personal</div>
+                                    <div class="dropdown-item-subtitle">Descubrí tu número de vida</div>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="alert('✨ Próximamente'); return false;">
+                                <div>
+                                    <div class="dropdown-item-title">Próximamente</div>
+                                    <div class="dropdown-item-subtitle">Más herramientas en camino</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </span>
+                <span class="breadcrumb-separator">\</span>
+                <span class="breadcrumb-current">Oráculo de lo Imposible</span>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="content-header">
+                <div class="title-container">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <h1>El Mapa de lo Imposible</h1>
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                    </svg>
+                </div>
+                <p class="subtitle">
+                    Cada carta es una coordenada desconocida hacia un lugar de vos que todavía no exploraste
+                </p>
+            </div>
+
+            <div class="card-wrapper">
+                <div class="card-container" id="cardContainer">
+                    <div class="card" id="card">
+                        <div class="card-face card-front" id="cardFront">
+                            <div class="card-front-content">
+                                <svg class="sparkle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                                </svg>
+                                <p class="reveal-text">Tocá la carta para revelar</p>
+                            </div>
+                        </div>
+
+                        <div class="card-face card-back">
+                            <div class="card-content">
+                                <div>
+                                    <span class="category-pill" id="cardCategory"></span>
+                                    <div class="card-header">
+                                        <svg class="map-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        <h2 class="card-title" id="cardTitle"></h2>
+                                    </div>
+                                </div>
+
+                                <div class="card-body">
+                                    <p class="description" id="cardDescription"></p>
+
+                                    <div class="card-image-container" id="cardImageContainer" style="display: none;">
+                                        <span class="card-image-placeholder">Imagen próximamente</span>
+                                    </div>
+
+                                    <div class="collapsible-section">
+                                        <div class="collapsible-header" id="actionHeader">
+                                            <span class="collapsible-label">
+                                                <svg class="heart-icon" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                                                </svg>
+                                                Tu acción
+                                            </span>
+                                            <svg class="collapsible-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        </div>
+                                        <div class="collapsible-content" id="actionContent">
+                                            <p class="action-text" id="cardAction"></p>
+                                        </div>
+                                    </div>
+
+                                    <div class="collapsible-section">
+                                        <div class="collapsible-header" id="reflectionHeader">
+                                            <span class="collapsible-label">
+                                                <svg class="star-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                                                </svg>
+                                                Para reflexionar
+                                            </span>
+                                            <svg class="collapsible-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        </div>
+                                        <div class="collapsible-content" id="reflectionContent">
+                                            <p class="reflection-text" id="cardReflection"></p>
+                                        </div>
+                                    </div>
+
+                                    <button class="flip-button" id="flipButton">
+                                        <svg class="flip-button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                        Girar otra
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                Creado con amor por <a href="https://www.linkedin.com/in/dianaledist/" target="_blank" class="links">Diana</a> para la exploración interior<br>
+                Humantopy - Explorá tu humanidad ♡
+            </div>
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <div class="bottom-nav-content">
+            <a href="#" class="nav-item" id="navHome">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="nav-label">Home</span>
+            </a>
+            
+            <a href="#" class="nav-item" id="navTools">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+                <span class="nav-label">Herramientas</span>
+            </a>
+
+            <a href="#" class="nav-item" id="navFilters">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                <span class="nav-label">Filtros</span>
+            </a>
+
+            <a href="#" class="nav-item" id="navMemory">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="nav-label">Memoria</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+
+    <div class="drawer" id="filterDrawer">
+        <div class="drawer-header">
+            <h2 class="drawer-title">Filtros</h2>
+            <div class="close-drawer" id="closeFilterDrawer">
+                <svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="selected-filters" id="selectedFilters"></div>
+
+        <div class="filter-section">
+            <h3 class="filter-section-title">Categorías</h3>
+            <div id="filterOptions"></div>
+        </div>
+    </div>
+
+    <div class="drawer" id="memoryDrawer">
+        <div class="drawer-header">
+            <h2 class="drawer-title">Tu Camino</h2>
+            <div class="close-drawer" id="closeMemoryDrawer">
+                <svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </div>
+        </div>
+
+        <button class="clear-history-btn" id="clearHistoryBtn" style="display: none;">
+            Borrar memoria de esta sesión
+        </button>
+
+        <div id="historyContainer">
+            <p class="history-empty">Aún no exploraste ninguna carta</p>
+        </div>
+    </div>
+
+    <script>
+        const cardsData = [
+            {
+                id: 1,
+                categoria: 'mente',
+                titulo: 'La Grieta Luminosa',
+                descripcion: 'Hay una fisura en tu coraza, y por ahí se cuela una luz que no reconocés. No la tapes. Dejala entrar, aunque arda un poco. Es la invitación a ver con ojos nuevos lo que creías imposible.',
+                accion: 'Escribí tres cosas que nunca te animaste a intentar. Elegí la que más miedo te da y hacé un paso microscópico hacia ella hoy.',
+                reflexion: '¿Qué pasaría si lo imposible ya estuviera pasando y no te dieras cuenta?',
+                imagen: null
+            },
+            {
+                id: 2,
+                categoria: 'mente',
+                titulo: 'El Laberinto Transparente',
+                descripcion: 'Creés que estás perdido, pero en realidad podés ver las paredes. El problema no es la confusión, es que tenés miedo de elegir un camino y equivocarte.',
+                accion: 'Tomá una decisión pequeña que venís postergando. No importa cuál, solo elegí.',
+                reflexion: '¿Y si no existiera la elección equivocada?',
+                imagen: null
+            },
+            {
+                id: 1001,
+                categoria: 'cuerpo',
+                titulo: 'La Puerta Sin Cerradura',
+                descripcion: 'Hay un umbral que creés cerrado, pero nunca tuvo llave. Lo que te detiene no es la puerta, sino el miedo a descubrir qué hay del otro lado.',
+                accion: 'Preguntale a alguien de confianza: "¿Qué ves en mí que yo no veo?" Escuchá sin defenderte.',
+                reflexion: 'Si esta puerta siempre estuvo abierta, ¿qué otras puertas falsas construiste?',
+                imagen: null
+            },
+            {
+                id: 2001,
+                categoria: 'mas-alla',
+                titulo: 'El Río Invertido',
+                descripcion: 'Todo lo que creías que fluía hacia adelante, en realidad está volviendo. Las respuestas que buscás en el futuro están enterradas en tu pasado.',
+                accion: 'Revisitá una memoria antigua que evitás. Escribile una carta a esa versión de vos desde el ahora.',
+                reflexion: '¿Qué te está diciendo tu yo del pasado que tu yo del presente necesita escuchar?',
+                imagen: null
+            },
+            {
+                id: 3001,
+                categoria: 'emociones',
+                titulo: 'El Espejo Roto',
+                descripcion: 'Tu reflejo está fragmentado, y cada pedazo muestra una verdad diferente. No busques recomponer la imagen perfecta.',
+                accion: 'Hacé una lista de tus contradicciones. Celebra que todas sean verdaderas al mismo tiempo.',
+                reflexion: '¿Qué pasaría si dejaras de intentar ser una sola cosa?',
+                imagen: null
+            },
+            {
+                id: 4001,
+                categoria: 'relaciones',
+                titulo: 'El Puente Invisible',
+                descripcion: 'Hay vínculos que no se ven pero se sienten. Hilos invisibles que te conectan con otros de formas que no podés nombrar.',
+                accion: 'Enviá un mensaje a alguien que pensás seguido pero con quien no hablás hace tiempo.',
+                reflexion: '¿A quién extrañás sin saber que lo extrañás?',
+                imagen: null
+            }
+        ];
+
+        function randomCard(arr) {
+            return arr.length ? arr[Math.floor(Math.random() * arr.length)] : null;
+        }
+
+        function formatCategoria(cat) {
+            return cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        function normalizeCategoryClass(cat) {
+            return cat.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+        }
+
+        function getCategoryColor(cat) {
+            const colors = {
+                'mente': { bg: 'rgba(147, 197, 253, 0.3)', color: '#93c5fd', border: 'rgba(147, 197, 253, 0.5)' },
+                'cuerpo': { bg: 'rgba(134, 239, 172, 0.3)', color: '#86efac', border: 'rgba(134, 239, 172, 0.5)' },
+                'espiritu': { bg: 'rgba(196, 181, 253, 0.3)', color: '#c4b5fd', border: 'rgba(196, 181, 253, 0.5)' },
+                'mas-alla': { bg: 'rgba(196, 181, 253, 0.3)', color: '#c4b5fd', border: 'rgba(196, 181, 253, 0.5)' },
+                'emociones': { bg: 'rgba(252, 165, 165, 0.3)', color: '#fca5a5', border: 'rgba(252, 165, 165, 0.5)' },
+                'relaciones': { bg: 'rgba(251, 207, 232, 0.3)', color: '#fbcfe8', border: 'rgba(251, 207, 232, 0.5)' }
+            };
+            return colors[normalizeCategoryClass(cat)] || colors['mente'];
+        }
+
+        let flipped = false;
+        let isAnimating = false;
+        let currentCard = randomCard(cardsData);
+        let selectedFilters = [];
+        let history = JSON.parse(sessionStorage.getItem('oracleHistory') || '[]');
+        let expandedCards = new Set();
+
+        const card = document.getElementById('card');
+        const cardFront = document.getElementById('cardFront');
+        const cardCategory = document.getElementById('cardCategory');
+        const cardTitle = document.getElementById('cardTitle');
+        const cardDescription = document.getElementById('cardDescription');
+        const cardAction = document.getElementById('cardAction');
+        const cardReflection = document.getElementById('cardReflection');
+        const flipButton = document.getElementById('flipButton');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const filterDrawer = document.getElementById('filterDrawer');
+        const memoryDrawer = document.getElementById('memoryDrawer');
+        const closeFilterDrawer = document.getElementById('closeFilterDrawer');
+        const closeMemoryDrawer = document.getElementById('closeMemoryDrawer');
+        const filterOptions = document.getElementById('filterOptions');
+        const selectedFiltersContainer = document.getElementById('selectedFilters');
+        const historyContainer = document.getElementById('historyContainer');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const navHome = document.getElementById('navHome');
+        const navTools = document.getElementById('navTools');
+        const navFilters = document.getElementById('navFilters');
+        const navMemory = document.getElementById('navMemory');
+        const logoContainer = document.getElementById('logoContainer');
+        const breadcrumbCategory = document.getElementById('breadcrumbCategory');
+        const categoryDropdown = document.getElementById('categoryDropdown');
+        const actionHeader = document.getElementById('actionHeader');
+        const actionContent = document.getElementById('actionContent');
+        const reflectionHeader = document.getElementById('reflectionHeader');
+        const reflectionContent = document.getElementById('reflectionContent');
+
+        initializeFilters();
+        updateCardContent();
+        updateHistoryUI();
+
+        function initializeFilters() {
+            const categories = [...new Set(cardsData.map(c => c.categoria))];
+            filterOptions.innerHTML = categories.map(cat => {
+                const categoryClass = normalizeCategoryClass(cat);
+                const displayName = formatCategoria(cat);
+                return `
+                    <div class="filter-option">
+                        <input type="checkbox" class="filter-checkbox" id="filter-${categoryClass}" value="${cat}">
+                        <label class="filter-label" for="filter-${categoryClass}">${displayName}</label>
+                    </div>
+                `;
+            }).join('');
+
+            filterOptions.querySelectorAll('.filter-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', handleFilterChange);
+            });
+        }
+
+        function handleFilterChange(e) {
+            const cat = e.target.value;
+            if (e.target.checked) {
+                selectedFilters.push(cat);
+            } else {
+                selectedFilters = selectedFilters.filter(f => f !== cat);
+            }
+            updateSelectedFiltersPills();
+        }
+
+        function updateSelectedFiltersPills() {
+            if (selectedFilters.length === 0) {
+                selectedFiltersContainer.innerHTML = '';
+                return;
+            }
+
+            selectedFiltersContainer.innerHTML = selectedFilters.map(cat => {
+                const displayName = formatCategoria(cat);
+                const colors = getCategoryColor(cat);
+                
+                return `
+                    <div class="filter-pill" 
+                         style="background: ${colors.bg}; color: ${colors.color}; border: 1px solid ${colors.border};"
+                         data-category="${cat}">
+                        ${displayName}
+                        <span class="filter-pill-remove">×</span>
+                    </div>
+                `;
+            }).join('');
+
+            selectedFiltersContainer.querySelectorAll('.filter-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    const cat = pill.dataset.category;
+                    selectedFilters = selectedFilters.filter(f => f !== cat);
+                    const checkbox = document.getElementById(`filter-${normalizeCategoryClass(cat)}`);
+                    if (checkbox) checkbox.checked = false;
+                    updateSelectedFiltersPills();
+                });
+            });
+        }
+
+        function getFilteredCards() {
+            return selectedFilters.length === 0 ? cardsData : cardsData.filter(c => selectedFilters.includes(c.categoria));
+        }
+
+        function loadRandomCard() {
+            const available = getFilteredCards();
+            if (available.length === 0) {
+                alert('No hay cartas con esos filtros');
+                return;
+            }
+            currentCard = randomCard(available);
+            updateCardContent();
+        }
+
+        function updateCardContent() {
+            if (!currentCard) return;
+            
+            const categoryClass = normalizeCategoryClass(currentCard.categoria);
+            const displayCategory = formatCategoria(currentCard.categoria);
+            
+            cardCategory.textContent = displayCategory;
+            cardCategory.className = 'category-pill category-' + categoryClass;
+            cardTitle.textContent = currentCard.titulo;
+            cardDescription.textContent = currentCard.descripcion;
+            cardAction.textContent = currentCard.accion;
+            cardReflection.textContent = currentCard.reflexion;
+
+            actionContent.classList.remove('expanded');
+            reflectionContent.classList.remove('expanded');
+            actionHeader.querySelector('.collapsible-icon').classList.remove('expanded');
+            reflectionHeader.querySelector('.collapsible-icon').classList.remove('expanded');
+        }
+
+        function addToHistory(c) {
+            const item = {
+                id: c.id,
+                titulo: c.titulo,
+                categoria: c.categoria,
+                descripcion: c.descripcion,
+                accion: c.accion,
+                reflexion: c.reflexion,
+                timestamp: new Date().toISOString()
+            };
+            
+            if (history.length === 0 || history[0].id !== c.id) {
+                history.unshift(item);
+                if (history.length > 20) history = history.slice(0, 20);
+                sessionStorage.setItem('oracleHistory', JSON.stringify(history));
+                updateHistoryUI();
+            }
+        }
+
+        function toggleHistoryCard(id) {
+            expandedCards.has(id) ? expandedCards.delete(id) : expandedCards.add(id);
+            updateHistoryUI();
+        }
+
+        function updateHistoryUI() {
+            if (history.length === 0) {
+                historyContainer.innerHTML = '<p class="history-empty">Aún no exploraste ninguna carta</p>';
+                clearHistoryBtn.style.display = 'none';
+            } else {
+                historyContainer.innerHTML = history.map(item => {
+                    const categoryClass = normalizeCategoryClass(item.categoria);
+                    const displayCategory = formatCategoria(item.categoria);
+                    const isExpanded = expandedCards.has(item.id);
+                    
+                    return `
+                        <div class="history-card ${isExpanded ? 'expanded' : ''}" data-card-id="${item.id}">
+                            <span class="category-pill category-${categoryClass}" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">${displayCategory}</span>
+                            <div class="history-card-title">${item.titulo}</div>
+                            <div class="history-card-description ${isExpanded ? '' : 'preview'}">
+                                ${item.descripcion}
+                            </div>
+                            ${isExpanded ? `
+                                <div class="history-card-action">
+                                    <span class="history-card-label">Tu acción:</span>
+                                    ${item.accion}
+                                </div>
+                                <div class="history-card-reflection">
+                                    <span class="history-card-label">Para reflexionar:</span>
+                                    ${item.reflexion}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+                clearHistoryBtn.style.display = 'block';
+
+                document.querySelectorAll('.history-card').forEach(c => {
+                    c.addEventListener('click', function() {
+                        toggleHistoryCard(parseInt(this.dataset.cardId));
+                    });
+                });
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('¿Estás seguro de que querés borrar la memoria de esta sesión?')) {
+                history = [];
+                expandedCards.clear();
+                sessionStorage.removeItem('oracleHistory');
+                updateHistoryUI();
+            }
+        }
+
+        function openDrawer(drawer) {
+            drawer.classList.add('active');
+            drawerOverlay.classList.add('active');
+        }
+
+        function closeAllDrawers() {
+            filterDrawer.classList.remove('active');
+            memoryDrawer.classList.remove('active');
+            drawerOverlay.classList.remove('active');
+        }
+
+        // Click en frente para revelar
+        cardFront.addEventListener('click', () => {
+            if (isAnimating || flipped) return;
+            flipped = true;
+            card.classList.add('flipped');
+            addToHistory(currentCard);
+        });
+
+        // Botón dentro de la card para girar otra
+        flipButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            flipped = false;
+            card.classList.remove('flipped');
+            
+            setTimeout(() => {
+                loadRandomCard();
+                isAnimating = false;
+            }, 400);
+        });
+
+        actionHeader.addEventListener('click', () => {
+            actionContent.classList.toggle('expanded');
+            actionHeader.querySelector('.collapsible-icon').classList.toggle('expanded');
+        });
+
+        reflectionHeader.addEventListener('click', () => {
+            reflectionContent.classList.toggle('expanded');
+            reflectionHeader.querySelector('.collapsible-icon').classList.toggle('expanded');
+        });
+
+        drawerOverlay.addEventListener('click', closeAllDrawers);
+        closeFilterDrawer.addEventListener('click', closeAllDrawers);
+        closeMemoryDrawer.addEventListener('click', closeAllDrawers);
+
+        navHome.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('🏠 Próximamente: Home de Humantopy');
+        });
+
+        navTools.addEventListener('click', (e) => {
+            e.preventDefault();
+            categoryDropdown.classList.toggle('active');
+        });
+
+        navFilters.addEventListener('click', (e) => {
+            e.preventDefault();
+            openDrawer(filterDrawer);
+        });
+
+        navMemory.addEventListener('click', (e) => {
+            e.preventDefault();
+            openDrawer(memoryDrawer);
+        });
+
+        clearHistoryBtn.addEventListener('click', clearHistory);
+
+        logoContainer.addEventListener('click', () => {
+            alert('🏠 Próximamente: Home de Humantopy');
+        });
+
+        breadcrumbCategory.addEventListener('click', (e) => {
+            e.stopPropagation();
+            categoryDropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!breadcrumbCategory.contains(e.target)) {
+                categoryDropdown.classList.remove('active');
+            }
+        });
+
+        let touchStartY = 0;
+        [filterDrawer, memoryDrawer].forEach(drawer => {
+            drawer.addEventListener('touchstart', (e) => {
+                touchStartY = e.changedTouches[0].screenY;
+            });
+
+            drawer.addEventListener('touchend', (e) => {
+                if (e.changedTouches[0].screenY - touchStartY > 50) {
+                    closeAllDrawers();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
